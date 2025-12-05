@@ -2,5 +2,12 @@
 version = 1
 
 [[package]]
+name = "glyph_pprf"
+version = "0.1.0"
+
+[[package]]
 name = "path_svg"
 version = "0.1.0"
+dependencies = [
+ "glyph_pprf",
+]

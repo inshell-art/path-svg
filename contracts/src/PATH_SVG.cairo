@@ -2,9 +2,9 @@
 mod PATH_SVG {
     use core::array::ArrayTrait;
     use core::byte_array::ByteArrayTrait;
+    use path_svg::rng;
     use starknet::ContractAddress;
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-    use path_svg::random_utils;
 
     const LABEL_STEP_COUNT: felt252 = 'STEP';
     const LABEL_SHARPNESS: felt252 = 'SHRP';
@@ -48,43 +48,22 @@ mod PATH_SVG {
 
             let step_number = self._random_range(token_id, LABEL_STEP_COUNT, 0, 1, 50);
 
-            let sharpness = self._random_range(token_id, LABEL_SHARPNESS, 0, 1, 8);
+            let sharpness = self._random_range(token_id, LABEL_SHARPNESS, 0, 1, 7);
 
             let stroke_w = self._max_u32(1, self._round_div(100, step_number));
 
             let targets = self._find_targets(token_id, WIDTH, HEIGHT, step_number);
 
             let thought_steps = self
-                ._find_steps(
-                    token_id,
-                    @targets,
-                    WIDTH,
-                    HEIGHT,
-                    LABEL_THOUGHT_DX,
-                    LABEL_THOUGHT_DY,
-                );
+                ._find_steps(token_id, @targets, WIDTH, HEIGHT, LABEL_THOUGHT_DX, LABEL_THOUGHT_DY);
             let thought_path = self._to_cubic_bezier(@thought_steps, sharpness);
 
             let will_steps = self
-                ._find_steps(
-                    token_id,
-                    @targets,
-                    WIDTH,
-                    HEIGHT,
-                    LABEL_WILL_DX,
-                    LABEL_WILL_DY,
-                );
+                ._find_steps(token_id, @targets, WIDTH, HEIGHT, LABEL_WILL_DX, LABEL_WILL_DY);
             let will_path = self._to_cubic_bezier(@will_steps, sharpness);
 
             let awa_steps = self
-                ._find_steps(
-                    token_id,
-                    @targets,
-                    WIDTH,
-                    HEIGHT,
-                    LABEL_AWA_DX,
-                    LABEL_AWA_DY,
-                );
+                ._find_steps(token_id, @targets, WIDTH, HEIGHT, LABEL_AWA_DX, LABEL_AWA_DY);
             let awa_path = self._to_cubic_bezier(@awa_steps, sharpness);
 
             let all_minted = if_thought_minted && if_will_minted && if_awa_minted;
@@ -264,7 +243,7 @@ mod PATH_SVG {
             max: u32,
         ) -> u32 {
             let address = self.pprf_address.read();
-            random_utils::pseudo_random_range(address, token_id, label, occurrence, min, max)
+            rng::pseudo_random_range(address, token_id, label, occurrence, min, max)
         }
 
         fn _pow2(self: @ContractState, exponent: u32) -> u32 {
@@ -294,11 +273,7 @@ mod PATH_SVG {
         }
 
         fn _find_targets(
-            self: @ContractState,
-            token_id: felt252,
-            width: u32,
-            height: u32,
-            interior_count: u32,
+            self: @ContractState, token_id: felt252, width: u32, height: u32, interior_count: u32,
         ) -> Array<Step> {
             let padding_min = width / 10_u32;
             let padding_max = width / 3_u32;

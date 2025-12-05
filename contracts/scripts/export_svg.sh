@@ -7,7 +7,7 @@ Usage: export_svg.sh <token_id> <thought_flag> <will_flag> <awa_flag> [output_fi
 
 Exports the literal output of the generate_svg entrypoint.
 Flags should be 1 (true) or 0 (false). If output_file is omitted the script writes
-path_<token_id>.svg in the current working directory.
+to ../exports/path_<token_id>.svg relative to the repo root.
 USAGE
 }
 
@@ -21,9 +21,13 @@ THOUGHT_FLAG="$2"
 WILL_FLAG="$3"
 AWA_FLAG="$4"
 
+# Optional: override sncast connection/account flags, defaults to using the devnet profile.
+SNCAST_ARGS="${SNCAST_ARGS:---profile devnet}"
+SNCAST_RPC="${SNCAST_RPC:-http://127.0.0.1:5050}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$(dirname "${SCRIPT_DIR}")")"
-DEFAULT_RELATIVE_OUTPUT="exports/path_${TOKEN_ID}.svg"
+DEFAULT_RELATIVE_OUTPUT="../exports/path_${TOKEN_ID}.svg"
 RAW_OUTPUT="${5:-${DEFAULT_RELATIVE_OUTPUT}}"
 
 for flag in "$THOUGHT_FLAG" "$WILL_FLAG" "$AWA_FLAG"; do
@@ -69,9 +73,10 @@ TMP_JSON=$(mktemp)
 trap 'rm -f "$TMP_JSON"' EXIT
 
 (cd "${PROJECT_ROOT}" && \
-  sncast --json --profile devnet call \
+  sncast --json ${SNCAST_ARGS} call \
     --contract-address "${CONTRACT_ADDRESS}" \
     --function generate_svg \
+    --url "${SNCAST_RPC}" \
     --calldata "${TOKEN_ID}" "${THOUGHT_FLAG}" "${WILL_FLAG}" "${AWA_FLAG}" \
     >"${TMP_JSON}")
 

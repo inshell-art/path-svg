@@ -1,17 +1,12 @@
 use core::array::Array;
+use glyph_pprf::{IPprfDispatcher, IPprfDispatcherTrait};
 use starknet::ContractAddress;
-use crate::pprf::{IPprfDispatcher, IPprfDispatcherTrait};
 
-/// Normalized output scaling (matches the on-chain `pprf` contract).
-const NORMALIZED_MAX: u256 = 1_000_000;
+
 /// Scope identifier appended to every `PATH_SVG` PRF request.
 const SCOPE_PATH: felt252 = 'PATH';
-
-// #[starknet::interface]
-// pub trait IPprf<TState> {
-//     /// Returns a normalized pseudo-random value in [0, NORMALIZED_MAX).
-//     fn pprf(self: @TState, params: Span<felt252>) -> u32;
-// }
+/// PPRF outputs values in [0, 999_999]; used to normalize into ranges.
+const NORMALIZED_MAX: u256 = 1_000_000;
 
 fn call_pprf(
     pprf_address: ContractAddress, token_id: felt252, label: felt252, occurrence: u32,

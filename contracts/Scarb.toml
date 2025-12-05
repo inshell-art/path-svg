@@ -5,10 +5,14 @@ edition = "2024_07"
 
 [dependencies]
 starknet = "2.8.2"
+glyph_pprf = { git = "https://github.com/inshell-art/pprf.git" }
 
 [[target.starknet-contract]]
 sierra = true
 casm = true
+
+[patch.'https://github.com/inshell-art/pprf.git']
+glyph_pprf = { path = "../../../Glyph/pprf" }
 
 [scripts]
 build = "scarb build"
